@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timeline Memo App</title>
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#8fa6c2">
+    <link rel="apple-touch-icon" href="./icon-192.png">
+    <style>
+        /* =========================================
+           カラーパレット・変数
+           ========================================= */
+        :root {
+            --bg-color: #f7f9fa;
+            --primary-color: #8fa6c2;
+            --card-bg: #ffffff;
+            --text-main: #0f1419;
+            --text-muted: #536471;
+            --border-color: #eff3f4;
+            --code-bg: #f4f3f0;
+            --sidebar-width: 250px;
+            --max-content-width: 600px;
+            --radius: 12px;
+            --memo-gap: 20px; /* メモ間の距離の初期値 */
+        }
+
+        /* =========================================
+           ベーススタイル
+           ========================================= */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            transition: background-color 0.3s ease;
+        }
+        
+        .app-container {
+            display: flex;
+            width: 100%;
+            max-width: 900px;
+            margin-top: 20px;
+            gap: 20px;
+            padding: 0 10px;
+        }
+
+        /* =========================================
+           左サイドバー
+           ========================================= */
+        .sidebar {
+            width: var(--sidebar-width);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding: 10px 0;
+            flex-shrink: 0;
+        }
+        
+        /* 設定ボタン */
+        .settings-btn {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 10px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        .settings-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            background-color: var(--card-bg);
+            outline: none;
+            font-size: 14px;
+        }
+        .search-box input:focus { border-color: var(--primary-color); }
+
+        .tag-list-container {
+            background-color: var(--card-bg);
+            padding: 15px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+        }
+        .tag-list-container h3 { font-size: 13px; color: var(--text-muted); margin-bottom: 10px; }
+        .tag-list { max-height: calc(100vh - 200px); overflow-y: auto; }
+        .tag-list::-webkit-scrollbar { width: 6px; }
+        .tag-list::-webkit-scrollbar-thumb { background-color: #ccc; border-radius: 3px; }
+
+        .tag-item {
+            display: block;
+            padding: 6px 8px;
+            color: var(--primary-color);
+            cursor: pointer;
+            border-radius: 4px;
+            margin-bottom: 2px;
+            font-size: 13px;
+            font-weight: bold;
+            word-break: break-all;
+        }
+        .tag-item:hover { background-color: var(--bg-color); }
+        .tag-item.active { background-color: var(--primary-color); color: white; }
+
+        /* =========================================
+           メインコンテンツ（入力・タイムライン）
+           ========================================= */
+        .main-content {
+            width: 100%;
+            max-width: var(--max-content-width);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding-bottom: 50px;
+            padding-top: 10px;
+        }
+
+        /* タイムラインのコンテナ（距離を変数で管理） */
+        #timeline {
+            display: flex;
+            flex-direction: column;
+            gap: var(--memo-gap); 
+        }
+
+        /* 入力エリア・編集エリア共通 */
+        .input-area, .edit-area {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 15px;
+        }
+        textarea {
+            width: 100%;
+            min-height: 80px;
+            border: none;
+            resize: vertical;
+            outline: none;
+            font-size: 15px;
+            color: var(--text-main);
+            margin-bottom: 5px;
+            font-family: inherit;
+        }
+        textarea::placeholder { color: var(--text-muted); }
+
+        /* ツールバー */
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+        .tool-btn {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .tool-btn:hover { 
+            background-color: var(--bg-color); 
+            color: var(--primary-color); 
+            border-color: var(--primary-color); 
+        }
+        
+        .action-row { display: flex; justify-content: space-between; align-items: center; }
+        
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .btn:hover { opacity: 0.8; }
+        .btn-cancel { background-color: transparent; color: var(--text-muted); border: 1px solid var(--border-color); }
+        .btn-cancel:hover { background-color: var(--bg-color); color: var(--text-main); }
+        .btn-group { display: flex; gap: 8px; }
+
+        /* メモカード */
+        .memo-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 15px;
+        }
+        .memo-header {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+        .memo-actions span { margin-left: 10px; cursor: pointer; }
+        .memo-actions span:hover { color: var(--primary-color); text-decoration: underline; }
+        
+        .memo-content { font-size: 15px; line-height: 1.6; white-space: pre-wrap; word-wrap: break-word; }
+        
+        /* 装飾系 */
+        .code-block {
+            background-color: var(--code-bg);
+            border: 1px solid #e2e1dc;
+            border-radius: 6px;
+            padding: 12px;
+            font-family: monospace;
+            font-size: 13px;
+            margin: 10px 0;
+            overflow-x: auto;
+            white-space: pre;
+        }
+        
+        /* タスクリスト・通常リスト */
+        .task-list { list-style: none; padding: 0; margin: 5px 0;}
+        .task-list li { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 4px; }
+        .task-list input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; margin-top: 4px; accent-color: var(--primary-color); }
+        .task-done { text-decoration: line-through; color: var(--text-muted); }
+
+        .normal-list { padding-left: 20px; margin: 5px 0;}
+        .normal-list li { margin-bottom: 4px; }
+
+        /* =========================================
+           設定モーダル（ポップアップ）
+           ========================================= */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            display: none; /* 初期は非表示 */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: var(--card-bg);
+            width: 90%;
+            max-width: 400px;
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+        .modal-header h2 { font-size: 16px; color: var(--text-main); }
+        .modal-close {
+            background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted);
+        }
+        .modal-close:hover { color: var(--text-main); }
+        
+        .setting-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 14px;
+            color: var(--text-main);
+            margin-bottom: 15px;
+        }
+        .setting-item input[type="color"] {
+            border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; padding: 0; background: none;
+        }
+        .setting-item input[type="range"] {
+            width: 120px; accent-color: var(--primary-color);
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- 左サイドバー -->
+    <div class="sidebar">
+        <!-- 設定ボタン -->
+        <button class="settings-btn" onclick="openSettings()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            設定
+        </button>
+
+        <!-- 検索 -->
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="メモを検索...">
+        </div>
+
+        <!-- タグ一覧 -->
+        <div class="tag-list-container">
+            <h3>タグ一覧</h3>
+            <div class="tag-list" id="tagList">
+                <!-- JSでタグ生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- メインコンテンツ -->
+    <div class="main-content">
+        <!-- 入力エリア -->
+        <div class="input-area">
+            <textarea id="memoInput" placeholder="今思ったことは..."></textarea>
+            
+            <!-- ツールバー -->
+            <div class="toolbar">
+                <button type="button" class="tool-btn" onclick="insertMarkup('**', '**')">太字</button>
+                <button type="button" class="tool-btn" onclick="insertMarkup('- ')">リスト</button>
+                <button type="button" class="tool-btn" onclick="insertMarkup('- [ ] ')">タスク</button>
+                <button type="button" class="tool-btn" onclick="insertMarkup('```\n', '\n```')">コード</button>
+            </div>
+
+            <div class="action-row">
+                <span style="font-size: 12px; color: var(--text-muted);">#タグ をつけて整理できます</span>
+                <button class="btn" onclick="saveNewMemo()">保存</button>
+            </div>
+        </div>
+
+        <!-- タイムライン -->
+        <div id="timeline">
+            <!-- メモがここに生成されます -->
+        </div>
+    </div>
+</div>
+
+<!-- ==========================================
+     設定モーダル
+     ========================================== -->
+<div id="settingsModal" class="modal-overlay" onclick="closeSettingsOutside(event)">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>設定</h2>
+            <button class="modal-close" onclick="closeSettings()">×</button>
+        </div>
+        
+        <!-- カラー変更 -->
+        <div class="setting-item">
+            <span>メインカラー</span>
+            <input type="color" id="themeColorPicker" value="#8fa6c2">
+        </div>
+        <div class="setting-item">
+            <span>背景カラー</span>
+            <input type="color" id="bgColorPicker" value="#f7f9fa">
+        </div>
+
+        <!-- メモ間隔の調整 -->
+        <div class="setting-item">
+            <span>メモ同士の距離</span>
+            <input type="range" id="memoGapSlider" min="5" max="50" value="20">
+        </div>
+
+        <hr style="border: 0; border-top: 1px dashed var(--border-color); margin: 20px 0;">
+        
+        <!-- バックアップ -->
+        <div style="display: flex; gap: 8px;">
+            <button type="button" class="tool-btn" style="flex:1;" onclick="exportData()">バックアップ</button>
+            <button type="button" class="tool-btn" style="flex:1;" onclick="document.getElementById('importFile').click()">復元</button>
+            <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
+        </div>
+    </div>
+</div>
+
+<script>
+    const STORAGE_KEY = 'timeline_memo_data';
+    let currentFilter = { text: '', tag: null };
+    let editingId = null;
+
+    // 初回ダミーデータ
+    const defaultData = [
+        {
+            id: 1,
+            text: "メモの装飾テストです。\n\n**ここは太字になります**\n\n- 普通のリスト\n- 箇条書き\n- 整理に便利です\n\n```\nprint(\"コードも書けます\")\n```\n#テスト",
+            timestamp: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
+            tags: ["#テスト"]
+        },
+        {
+            id: 2,
+            text: "やることリスト\n- [x] UIを整理する\n- [x] 設定をモーダルにする\n- [x] メモの距離を調整できるようにする\n#タスク",
+            timestamp: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
+            tags: ["#タスク"]
+        }
+    ];
+
+    let memos = JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultData;
+
+    function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(memos)); }
+
+    // ==========================================
+    // 設定モーダルの制御
+    // ==========================================
+    const modal = document.getElementById('settingsModal');
+
+    function openSettings() {
+        modal.style.display = 'flex';
+    }
+
+    function closeSettings() {
+        modal.style.display = 'none';
+    }
+
+    // モーダルの外側（背景）をクリックした時に閉じる
+    function closeSettingsOutside(event) {
+        if (event.target === modal) {
+            closeSettings();
+        }
+    }
+
+    // ==========================================
+    // バックアップ機能
+    // ==========================================
+    function exportData() {
+        const dataStr = JSON.stringify(memos, null, 2);
+        const blob = new Blob([dataStr], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const d = new Date();
+        const dateStr = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}_${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}`;
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `memo_backup_${dateStr}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    function importData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const importedData = JSON.parse(e.target.result);
+                if (Array.isArray(importedData)) {
+                    if(confirm('現在のデータが上書きされます。復元してもよろしいですか？')) {
+                        memos = importedData;
+                        saveData();
+                        renderApp();
+                        alert('復元が完了しました。');
+                        closeSettings(); // 成功したらモーダルを閉じる
+                    }
+                } else {
+                    alert('ファイルの形式が正しくありません。');
+                }
+            } catch (error) {
+                alert('ファイルの読み込みに失敗しました。');
+            }
+        };
+        reader.readAsText(file);
+        event.target.value = ''; 
+    }
+
+    // ==========================================
+    // 設定・表示の初期化
+    // ==========================================
+    // 色の復元
+    const savedPrimaryColor = localStorage.getItem('themeColor_primary');
+    if (savedPrimaryColor) {
+        document.documentElement.style.setProperty('--primary-color', savedPrimaryColor);
+        document.getElementById('themeColorPicker').value = savedPrimaryColor;
+    }
+    const savedBgColor = localStorage.getItem('themeColor_bg');
+    if (savedBgColor) {
+        document.documentElement.style.setProperty('--bg-color', savedBgColor);
+        document.getElementById('bgColorPicker').value = savedBgColor;
+    }
+    
+    // メモ間隔の復元
+    const savedMemoGap = localStorage.getItem('theme_memo_gap');
+    if (savedMemoGap) {
+        document.documentElement.style.setProperty('--memo-gap', savedMemoGap + 'px');
+        document.getElementById('memoGapSlider').value = savedMemoGap;
+    }
+
+    renderApp();
+
+    function formatDate(isoString) {
+        const d = new Date(isoString);
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        const hh = String(d.getHours()).padStart(2, '0');
+        const min = String(d.getMinutes()).padStart(2, '0');
+        return `${yyyy}/${mm}/${dd} ${hh}:${min}`;
+    }
+
+    function insertMarkup(prefix, suffix = '') {
+        const textarea = document.getElementById('memoInput');
+        const startPos = textarea.selectionStart;
+        const endPos = textarea.selectionEnd;
+        
+        const selectedText = textarea.value.substring(startPos, endPos);
+        const beforeText = textarea.value.substring(0, startPos);
+        const afterText = textarea.value.substring(endPos, textarea.value.length);
+        
+        textarea.value = beforeText + prefix + selectedText + suffix + afterText;
+        
+        if (startPos === endPos) {
+            textarea.selectionStart = textarea.selectionEnd = startPos + prefix.length;
+        } else {
+            textarea.selectionStart = textarea.selectionEnd = startPos + prefix.length + selectedText.length + suffix.length;
+        }
+        
+        textarea.focus();
+    }
+
+    function renderApp() {
+        renderMemos();
+        renderTags();
+    }
+
+    function renderMemos() {
+        const timeline = document.getElementById('timeline');
+        timeline.innerHTML = '';
+
+        let filteredMemos = memos.filter(memo => {
+            const matchText = memo.text.toLowerCase().includes(currentFilter.text.toLowerCase());
+            const matchTag = currentFilter.tag ? memo.tags.includes(currentFilter.tag) : true;
+            return matchText && matchTag;
+        });
+
+        filteredMemos.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+        filteredMemos.forEach(memo => {
+            const card = document.createElement('div');
+            card.className = 'memo-card';
+            
+            if (editingId === memo.id) {
+                card.innerHTML = `
+                    <div class="edit-area" style="padding:0; border:none;">
+                        <textarea id="editInput-${memo.id}">${memo.text}</textarea>
+                        <div class="action-row" style="border:none; padding-top:10px;">
+                            <span style="font-size:12px; color:var(--text-muted);">編集中...</span>
+                            <div class="btn-group">
+                                <button class="btn btn-cancel" onclick="cancelEdit()">キャンセル</button>
+                                <button class="btn" onclick="saveEdit(${memo.id})">更新</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                card.innerHTML = `
+                    <div class="memo-header">
+                        <span>${formatDate(memo.timestamp)}</span>
+                        <div class="memo-actions">
+                            <span onclick="startEdit(${memo.id})">編集</span>
+                            <span style="color:#f4212e;" onclick="deleteMemo(${memo.id})">削除</span>
+                        </div>
+                    </div>
+                    <div class="memo-content">${formatContent(memo.text, memo.id)}</div>
+                `;
+            }
+            timeline.appendChild(card);
+        });
+    }
+
+    function renderTags() {
+        const tagList = document.getElementById('tagList');
+        tagList.innerHTML = '';
+        const allTags = [...new Set(memos.flatMap(m => m.tags))];
+        
+        const allItem = document.createElement('span');
+        allItem.className = `tag-item ${currentFilter.tag === null ? 'active' : ''}`;
+        allItem.textContent = '# すべて表示';
+        allItem.onclick = () => { currentFilter.tag = null; renderApp(); };
+        tagList.appendChild(allItem);
+
+        allTags.forEach(tag => {
+            const el = document.createElement('span');
+            el.className = `tag-item ${currentFilter.tag === tag ? 'active' : ''}`;
+            el.textContent = tag;
+            el.onclick = () => { currentFilter.tag = tag; renderApp(); };
+            tagList.appendChild(el);
+        });
+    }
+
+    function formatContent(text, memoId) {
+        let safeText = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        
+        safeText = safeText.replace(/```([\s\S]*?)```/g, '<div class="code-block">$1</div>');
+        safeText = safeText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+        let lines = safeText.split('\n');
+        for (let i = 0; i < lines.length; i++) {
+            if (lines[i].match(/^- \[ \] (.*)$/)) {
+                lines[i] = lines[i].replace(/^- \[ \] (.*)$/, 
+                    `<ul class="task-list"><li><input type="checkbox" onchange="toggleTask(${memoId}, ${i}, true)"> <span>$1</span></li></ul>`);
+            } 
+            else if (lines[i].match(/^- \[x\] (.*)$/i)) {
+                lines[i] = lines[i].replace(/^- \[x\] (.*)$/i, 
+                    `<ul class="task-list"><li><input type="checkbox" checked onchange="toggleTask(${memoId}, ${i}, false)"> <span class="task-done">$1</span></li></ul>`);
+            } 
+            else if (lines[i].match(/^- (.*)$/)) {
+                lines[i] = lines[i].replace(/^- (.*)$/, `<ul class="normal-list"><li>$1</li></ul>`);
+            }
+
+            lines[i] = lines[i].replace(/(#[^\s]+)/g, '<span style="color: var(--primary-color); cursor:pointer;" onclick="setTagFilter(\'$1\')">$1</span>');
+        }
+
+        let html = lines.join('\n');
+        html = html.replace(/<\/ul>\n<ul class="task-list">/g, '');
+        html = html.replace(/<\/ul>\n<ul class="normal-list">/g, '');
+        return html;
+    }
+
+    function toggleTask(memoId, lineIndex, isChecking) {
+        const memo = memos.find(m => m.id === memoId);
+        if (!memo) return;
+
+        let lines = memo.text.split('\n');
+        if (isChecking) {
+            lines[lineIndex] = lines[lineIndex].replace(/^- \[ \]/, '- [x]');
+        } else {
+            lines[lineIndex] = lines[lineIndex].replace(/^- \[x\]/i, '- [ ]');
+        }
+
+        memo.text = lines.join('\n');
+        saveData();
+        renderApp();
+    }
+
+    function saveNewMemo() {
+        const input = document.getElementById('memoInput');
+        const text = input.value.trim();
+        if (!text) return;
+
+        const tags = text.match(/#[^\s]+/g) || [];
+
+        memos.push({
+            id: Date.now(),
+            text: text,
+            timestamp: new Date().toISOString(),
+            tags: tags
+        });
+
+        saveData();
+        input.value = ''; 
+        renderApp();
+    }
+
+    function deleteMemo(id) {
+        if (confirm('このメモを削除しますか？')) {
+            memos = memos.filter(m => m.id !== id);
+            saveData();
+            renderApp();
+        }
+    }
+
+    function startEdit(id) {
+        editingId = id;
+        renderApp();
+    }
+
+    function cancelEdit() {
+        editingId = null;
+        renderApp();
+    }
+
+    function saveEdit(id) {
+        const textarea = document.getElementById(`editInput-${id}`);
+        const newText = textarea.value.trim();
+        
+        if (!newText) {
+            deleteMemo(id);
+            return;
+        }
+
+        const memo = memos.find(m => m.id === id);
+        if (memo) {
+            memo.text = newText;
+            memo.tags = newText.match(/#[^\s]+/g) || [];
+            saveData();
+        }
+        
+        editingId = null;
+        renderApp();
+    }
+
+    function setTagFilter(tag) {
+        currentFilter.tag = tag;
+        renderApp();
+    }
+
+    // ==========================================
+    // イベントリスナー（検索・設定系）
+    // ==========================================
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+        currentFilter.text = e.target.value;
+        renderApp();
+    });
+
+    document.getElementById('themeColorPicker').addEventListener('input', (e) => {
+        const newColor = e.target.value;
+        document.documentElement.style.setProperty('--primary-color', newColor);
+        localStorage.setItem('themeColor_primary', newColor);
+    });
+
+    document.getElementById('bgColorPicker').addEventListener('input', (e) => {
+        const newColor = e.target.value;
+        document.documentElement.style.setProperty('--bg-color', newColor);
+        localStorage.setItem('themeColor_bg', newColor);
+    });
+
+    // メモ間隔スライダーのイベント
+    document.getElementById('memoGapSlider').addEventListener('input', (e) => {
+        const newGap = e.target.value;
+        document.documentElement.style.setProperty('--memo-gap', newGap + 'px');
+        localStorage.setItem('theme_memo_gap', newGap);
+    });
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(() => {
+        console.log('Service Worker registered');
+      })
+      .catch(error => {
+        console.error('Service Worker registration failed:', error);
+      });
+  });
+}
+</script>
+</body>
+</html>
