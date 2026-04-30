@@ -22,7 +22,7 @@
             --sidebar-width: 250px;
             --max-content-width: 600px;
             --radius: 12px;
-            --memo-gap: 20px; /* メモ間の距離の初期値 */
+            --memo-gap: 20px;
         }
 
         /* =========================================
@@ -60,7 +60,6 @@
             flex-shrink: 0;
         }
         
-        /* 設定ボタン */
         .settings-btn {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -75,10 +74,7 @@
             gap: 8px;
             transition: all 0.2s;
         }
-        .settings-btn:hover {
-            border-color: var(--primary-color);
-            color: var(--primary-color);
-        }
+        .settings-btn:hover { border-color: var(--primary-color); color: var(--primary-color); }
 
         .search-box input {
             width: 100%;
@@ -129,14 +125,12 @@
             padding-top: 10px;
         }
 
-        /* タイムラインのコンテナ（距離を変数で管理） */
         #timeline {
             display: flex;
             flex-direction: column;
             gap: var(--memo-gap); 
         }
 
-        /* 入力エリア・編集エリア共通 */
         .input-area, .edit-area {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -156,7 +150,6 @@
         }
         textarea::placeholder { color: var(--text-muted); }
 
-        /* ツールバー */
         .toolbar {
             display: flex;
             gap: 8px;
@@ -176,11 +169,7 @@
             transition: all 0.2s;
             text-align: center;
         }
-        .tool-btn:hover { 
-            background-color: var(--bg-color); 
-            color: var(--primary-color); 
-            border-color: var(--primary-color); 
-        }
+        .tool-btn:hover { background-color: var(--bg-color); color: var(--primary-color); border-color: var(--primary-color); }
         
         .action-row { display: flex; justify-content: space-between; align-items: center; }
         
@@ -199,7 +188,6 @@
         .btn-cancel:hover { background-color: var(--bg-color); color: var(--text-main); }
         .btn-group { display: flex; gap: 8px; }
 
-        /* メモカード */
         .memo-card {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -218,7 +206,6 @@
         
         .memo-content { font-size: 15px; line-height: 1.6; white-space: pre-wrap; word-wrap: break-word; }
         
-        /* 装飾系 */
         .code-block {
             background-color: var(--code-bg);
             border: 1px solid #e2e1dc;
@@ -231,7 +218,6 @@
             white-space: pre;
         }
         
-        /* タスクリスト・通常リスト */
         .task-list { list-style: none; padding: 0; margin: 5px 0;}
         .task-list li { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 4px; }
         .task-list input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; margin-top: 4px; accent-color: var(--primary-color); }
@@ -241,13 +227,13 @@
         .normal-list li { margin-bottom: 4px; }
 
         /* =========================================
-           設定モーダル（ポップアップ）
+           設定モーダル
            ========================================= */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0, 0, 0, 0.4);
-            display: none; /* 初期は非表示 */
+            display: none;
             justify-content: center;
             align-items: center;
             z-index: 1000;
@@ -269,9 +255,7 @@
             padding-bottom: 10px;
         }
         .modal-header h2 { font-size: 16px; color: var(--text-main); }
-        .modal-close {
-            background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted);
-        }
+        .modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted); }
         .modal-close:hover { color: var(--text-main); }
         
         .setting-item {
@@ -282,12 +266,8 @@
             color: var(--text-main);
             margin-bottom: 15px;
         }
-        .setting-item input[type="color"] {
-            border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; padding: 0; background: none;
-        }
-        .setting-item input[type="range"] {
-            width: 120px; accent-color: var(--primary-color);
-        }
+        .setting-item input[type="color"] { border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; padding: 0; background: none; }
+        .setting-item input[type="range"] { width: 120px; accent-color: var(--primary-color); }
 
     </style>
 </head>
@@ -296,56 +276,46 @@
 <div class="app-container">
     <!-- 左サイドバー -->
     <div class="sidebar">
-        <!-- 設定ボタン -->
         <button class="settings-btn" onclick="openSettings()">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
             設定
         </button>
 
-        <!-- 検索 -->
         <div class="search-box">
             <input type="text" id="searchInput" placeholder="メモを検索...">
         </div>
 
-        <!-- タグ一覧 -->
         <div class="tag-list-container">
             <h3>タグ一覧</h3>
-            <div class="tag-list" id="tagList">
-                <!-- JSでタグ生成 -->
-            </div>
+            <div class="tag-list" id="tagList"></div>
         </div>
     </div>
 
     <!-- メインコンテンツ -->
     <div class="main-content">
-        <!-- 入力エリア -->
         <div class="input-area">
             <textarea id="memoInput" placeholder="今思ったことは..."></textarea>
             
-            <!-- ツールバー -->
             <div class="toolbar">
                 <button type="button" class="tool-btn" onclick="insertMarkup('**', '**')">太字</button>
                 <button type="button" class="tool-btn" onclick="insertMarkup('- ')">リスト</button>
                 <button type="button" class="tool-btn" onclick="insertMarkup('- [ ] ')">タスク</button>
                 <button type="button" class="tool-btn" onclick="insertMarkup('```\n', '\n```')">コード</button>
+                <!-- 追加：タグ挿入ボタン -->
+                <button type="button" class="tool-btn" onclick="insertMarkup('#')">タグ</button>
             </div>
 
             <div class="action-row">
-                <span style="font-size: 12px; color: var(--text-muted);">#タグ をつけて整理できます</span>
+                <span style="font-size: 12px; color: var(--text-muted);">ボタンや # を使って装飾・整理ができます</span>
                 <button class="btn" onclick="saveNewMemo()">保存</button>
             </div>
         </div>
 
-        <!-- タイムライン -->
-        <div id="timeline">
-            <!-- メモがここに生成されます -->
-        </div>
+        <div id="timeline"></div>
     </div>
 </div>
 
-<!-- ==========================================
-     設定モーダル
-     ========================================== -->
+<!-- 設定モーダル -->
 <div id="settingsModal" class="modal-overlay" onclick="closeSettingsOutside(event)">
     <div class="modal-content">
         <div class="modal-header">
@@ -353,7 +323,6 @@
             <button class="modal-close" onclick="closeSettings()">×</button>
         </div>
         
-        <!-- カラー変更 -->
         <div class="setting-item">
             <span>メインカラー</span>
             <input type="color" id="themeColorPicker" value="#8fa6c2">
@@ -362,8 +331,6 @@
             <span>背景カラー</span>
             <input type="color" id="bgColorPicker" value="#f7f9fa">
         </div>
-
-        <!-- メモ間隔の調整 -->
         <div class="setting-item">
             <span>メモ同士の距離</span>
             <input type="range" id="memoGapSlider" min="5" max="50" value="20">
@@ -371,7 +338,6 @@
 
         <hr style="border: 0; border-top: 1px dashed var(--border-color); margin: 20px 0;">
         
-        <!-- バックアップ -->
         <div style="display: flex; gap: 8px;">
             <button type="button" class="tool-btn" style="flex:1;" onclick="exportData()">バックアップ</button>
             <button type="button" class="tool-btn" style="flex:1;" onclick="document.getElementById('importFile').click()">復元</button>
@@ -382,10 +348,13 @@
 
 <script>
     const STORAGE_KEY = 'timeline_memo_data';
+    
+    // ★修正：HTMLのタグ記号(<, >)や句読点を巻き込まないための厳密な正規表現
+    const TAG_REGEX = /#[^\s<>"'.,。、!！?？]+/g;
+
     let currentFilter = { text: '', tag: null };
     let editingId = null;
 
-    // 初回ダミーデータ
     const defaultData = [
         {
             id: 1,
@@ -395,148 +364,87 @@
         },
         {
             id: 2,
-            text: "やることリスト\n- [x] UIを整理する\n- [x] 設定をモーダルにする\n- [x] メモの距離を調整できるようにする\n#タスク",
+            text: "やることリスト\n- [x] UIを整理する\n- [x] タグバグの修正\n- [ ] アプリを活用する\n#タスク",
             timestamp: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
             tags: ["#タスク"]
         }
     ];
 
     let memos = JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultData;
-
     function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(memos)); }
 
-    // ==========================================
-    // 設定モーダルの制御
-    // ==========================================
+    // モーダル制御
     const modal = document.getElementById('settingsModal');
+    function openSettings() { modal.style.display = 'flex'; }
+    function closeSettings() { modal.style.display = 'none'; }
+    function closeSettingsOutside(event) { if (event.target === modal) closeSettings(); }
 
-    function openSettings() {
-        modal.style.display = 'flex';
-    }
-
-    function closeSettings() {
-        modal.style.display = 'none';
-    }
-
-    // モーダルの外側（背景）をクリックした時に閉じる
-    function closeSettingsOutside(event) {
-        if (event.target === modal) {
-            closeSettings();
-        }
-    }
-
-    // ==========================================
     // バックアップ機能
-    // ==========================================
     function exportData() {
         const dataStr = JSON.stringify(memos, null, 2);
         const blob = new Blob([dataStr], { type: "application/json" });
         const url = URL.createObjectURL(blob);
         const d = new Date();
         const dateStr = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}_${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}`;
-        
         const a = document.createElement('a');
-        a.href = url;
-        a.download = `memo_backup_${dateStr}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        a.href = url; a.download = `memo_backup_${dateStr}.json`;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
     }
-
     function importData(event) {
         const file = event.target.files[0];
         if (!file) return;
-
         const reader = new FileReader();
         reader.onload = function(e) {
             try {
                 const importedData = JSON.parse(e.target.result);
                 if (Array.isArray(importedData)) {
                     if(confirm('現在のデータが上書きされます。復元してもよろしいですか？')) {
-                        memos = importedData;
-                        saveData();
-                        renderApp();
-                        alert('復元が完了しました。');
-                        closeSettings(); // 成功したらモーダルを閉じる
+                        memos = importedData; saveData(); renderApp(); alert('復元が完了しました。'); closeSettings();
                     }
-                } else {
-                    alert('ファイルの形式が正しくありません。');
-                }
-            } catch (error) {
-                alert('ファイルの読み込みに失敗しました。');
-            }
+                } else { alert('ファイルの形式が正しくありません。'); }
+            } catch (error) { alert('ファイルの読み込みに失敗しました。'); }
         };
-        reader.readAsText(file);
-        event.target.value = ''; 
+        reader.readAsText(file); event.target.value = ''; 
     }
 
-    // ==========================================
-    // 設定・表示の初期化
-    // ==========================================
-    // 色の復元
+    // 初期化
     const savedPrimaryColor = localStorage.getItem('themeColor_primary');
-    if (savedPrimaryColor) {
-        document.documentElement.style.setProperty('--primary-color', savedPrimaryColor);
-        document.getElementById('themeColorPicker').value = savedPrimaryColor;
-    }
+    if (savedPrimaryColor) { document.documentElement.style.setProperty('--primary-color', savedPrimaryColor); document.getElementById('themeColorPicker').value = savedPrimaryColor; }
     const savedBgColor = localStorage.getItem('themeColor_bg');
-    if (savedBgColor) {
-        document.documentElement.style.setProperty('--bg-color', savedBgColor);
-        document.getElementById('bgColorPicker').value = savedBgColor;
-    }
-    
-    // メモ間隔の復元
+    if (savedBgColor) { document.documentElement.style.setProperty('--bg-color', savedBgColor); document.getElementById('bgColorPicker').value = savedBgColor; }
     const savedMemoGap = localStorage.getItem('theme_memo_gap');
-    if (savedMemoGap) {
-        document.documentElement.style.setProperty('--memo-gap', savedMemoGap + 'px');
-        document.getElementById('memoGapSlider').value = savedMemoGap;
-    }
+    if (savedMemoGap) { document.documentElement.style.setProperty('--memo-gap', savedMemoGap + 'px'); document.getElementById('memoGapSlider').value = savedMemoGap; }
 
     renderApp();
 
     function formatDate(isoString) {
         const d = new Date(isoString);
-        const yyyy = d.getFullYear();
-        const mm = String(d.getMonth() + 1).padStart(2, '0');
-        const dd = String(d.getDate()).padStart(2, '0');
-        const hh = String(d.getHours()).padStart(2, '0');
-        const min = String(d.getMinutes()).padStart(2, '0');
+        const yyyy = d.getFullYear(); const mm = String(d.getMonth() + 1).padStart(2, '0'); const dd = String(d.getDate()).padStart(2, '0');
+        const hh = String(d.getHours()).padStart(2, '0'); const min = String(d.getMinutes()).padStart(2, '0');
         return `${yyyy}/${mm}/${dd} ${hh}:${min}`;
     }
 
     function insertMarkup(prefix, suffix = '') {
         const textarea = document.getElementById('memoInput');
-        const startPos = textarea.selectionStart;
-        const endPos = textarea.selectionEnd;
-        
+        const startPos = textarea.selectionStart; const endPos = textarea.selectionEnd;
         const selectedText = textarea.value.substring(startPos, endPos);
-        const beforeText = textarea.value.substring(0, startPos);
-        const afterText = textarea.value.substring(endPos, textarea.value.length);
+        const beforeText = textarea.value.substring(0, startPos); const afterText = textarea.value.substring(endPos, textarea.value.length);
         
         textarea.value = beforeText + prefix + selectedText + suffix + afterText;
-        
-        if (startPos === endPos) {
-            textarea.selectionStart = textarea.selectionEnd = startPos + prefix.length;
-        } else {
-            textarea.selectionStart = textarea.selectionEnd = startPos + prefix.length + selectedText.length + suffix.length;
-        }
-        
+        if (startPos === endPos) { textarea.selectionStart = textarea.selectionEnd = startPos + prefix.length; } 
+        else { textarea.selectionStart = textarea.selectionEnd = startPos + prefix.length + selectedText.length + suffix.length; }
         textarea.focus();
     }
 
-    function renderApp() {
-        renderMemos();
-        renderTags();
-    }
+    function renderApp() { renderMemos(); renderTags(); }
 
     function renderMemos() {
         const timeline = document.getElementById('timeline');
         timeline.innerHTML = '';
-
         let filteredMemos = memos.filter(memo => {
             const matchText = memo.text.toLowerCase().includes(currentFilter.text.toLowerCase());
-            const matchTag = currentFilter.tag ? memo.tags.includes(currentFilter.tag) : true;
+            // タグの存在チェックを追加（古いデータ対策）
+            const matchTag = currentFilter.tag ? (memo.tags || []).includes(currentFilter.tag) : true;
             return matchText && matchTag;
         });
 
@@ -545,7 +453,6 @@
         filteredMemos.forEach(memo => {
             const card = document.createElement('div');
             card.className = 'memo-card';
-            
             if (editingId === memo.id) {
                 card.innerHTML = `
                     <div class="edit-area" style="padding:0; border:none;">
@@ -578,7 +485,7 @@
     function renderTags() {
         const tagList = document.getElementById('tagList');
         tagList.innerHTML = '';
-        const allTags = [...new Set(memos.flatMap(m => m.tags))];
+        const allTags = [...new Set(memos.flatMap(m => m.tags || []))];
         
         const allItem = document.createElement('span');
         allItem.className = `tag-item ${currentFilter.tag === null ? 'active' : ''}`;
@@ -586,7 +493,8 @@
         allItem.onclick = () => { currentFilter.tag = null; renderApp(); };
         tagList.appendChild(allItem);
 
-        allTags.forEach(tag => {
+        // 古いバグで生まれたゴミタグ（</等のHTMLが入ったもの）を非表示にするフィルターを追加
+        allTags.filter(tag => !tag.includes('<')).forEach(tag => {
             const el = document.createElement('span');
             el.className = `tag-item ${currentFilter.tag === tag ? 'active' : ''}`;
             el.textContent = tag;
@@ -604,18 +512,14 @@
         let lines = safeText.split('\n');
         for (let i = 0; i < lines.length; i++) {
             if (lines[i].match(/^- \[ \] (.*)$/)) {
-                lines[i] = lines[i].replace(/^- \[ \] (.*)$/, 
-                    `<ul class="task-list"><li><input type="checkbox" onchange="toggleTask(${memoId}, ${i}, true)"> <span>$1</span></li></ul>`);
-            } 
-            else if (lines[i].match(/^- \[x\] (.*)$/i)) {
-                lines[i] = lines[i].replace(/^- \[x\] (.*)$/i, 
-                    `<ul class="task-list"><li><input type="checkbox" checked onchange="toggleTask(${memoId}, ${i}, false)"> <span class="task-done">$1</span></li></ul>`);
-            } 
-            else if (lines[i].match(/^- (.*)$/)) {
+                lines[i] = lines[i].replace(/^- \[ \] (.*)$/, `<ul class="task-list"><li><input type="checkbox" onchange="toggleTask(${memoId}, ${i}, true)"> <span>$1</span></li></ul>`);
+            } else if (lines[i].match(/^- \[x\] (.*)$/i)) {
+                lines[i] = lines[i].replace(/^- \[x\] (.*)$/i, `<ul class="task-list"><li><input type="checkbox" checked onchange="toggleTask(${memoId}, ${i}, false)"> <span class="task-done">$1</span></li></ul>`);
+            } else if (lines[i].match(/^- (.*)$/)) {
                 lines[i] = lines[i].replace(/^- (.*)$/, `<ul class="normal-list"><li>$1</li></ul>`);
             }
-
-            lines[i] = lines[i].replace(/(#[^\s]+)/g, '<span style="color: var(--primary-color); cursor:pointer;" onclick="setTagFilter(\'$1\')">$1</span>');
+            // ★修正：厳密な正規表現を使ってタグを色付け
+            lines[i] = lines[i].replace(TAG_REGEX, '<span style="color: var(--primary-color); cursor:pointer;" onclick="setTagFilter(\'$&\')">$&</span>');
         }
 
         let html = lines.join('\n');
@@ -627,17 +531,11 @@
     function toggleTask(memoId, lineIndex, isChecking) {
         const memo = memos.find(m => m.id === memoId);
         if (!memo) return;
-
         let lines = memo.text.split('\n');
-        if (isChecking) {
-            lines[lineIndex] = lines[lineIndex].replace(/^- \[ \]/, '- [x]');
-        } else {
-            lines[lineIndex] = lines[lineIndex].replace(/^- \[x\]/i, '- [ ]');
-        }
-
+        if (isChecking) { lines[lineIndex] = lines[lineIndex].replace(/^- \[ \]/, '- [x]'); } 
+        else { lines[lineIndex] = lines[lineIndex].replace(/^- \[x\]/i, '- [ ]'); }
         memo.text = lines.join('\n');
-        saveData();
-        renderApp();
+        saveData(); renderApp();
     }
 
     function saveNewMemo() {
@@ -645,89 +543,41 @@
         const text = input.value.trim();
         if (!text) return;
 
-        const tags = text.match(/#[^\s]+/g) || [];
+        // ★修正：厳密な正規表現でタグ抽出
+        const tags = text.match(TAG_REGEX) || [];
 
-        memos.push({
-            id: Date.now(),
-            text: text,
-            timestamp: new Date().toISOString(),
-            tags: tags
-        });
-
-        saveData();
-        input.value = ''; 
-        renderApp();
+        memos.push({ id: Date.now(), text: text, timestamp: new Date().toISOString(), tags: tags });
+        saveData(); input.value = ''; renderApp();
     }
 
     function deleteMemo(id) {
-        if (confirm('このメモを削除しますか？')) {
-            memos = memos.filter(m => m.id !== id);
-            saveData();
-            renderApp();
-        }
+        if (confirm('このメモを削除しますか？')) { memos = memos.filter(m => m.id !== id); saveData(); renderApp(); }
     }
 
-    function startEdit(id) {
-        editingId = id;
-        renderApp();
-    }
-
-    function cancelEdit() {
-        editingId = null;
-        renderApp();
-    }
+    function startEdit(id) { editingId = id; renderApp(); }
+    function cancelEdit() { editingId = null; renderApp(); }
 
     function saveEdit(id) {
         const textarea = document.getElementById(`editInput-${id}`);
         const newText = textarea.value.trim();
-        
-        if (!newText) {
-            deleteMemo(id);
-            return;
-        }
+        if (!newText) { deleteMemo(id); return; }
 
         const memo = memos.find(m => m.id === id);
         if (memo) {
             memo.text = newText;
-            memo.tags = newText.match(/#[^\s]+/g) || [];
+            // ★修正：厳密な正規表現でタグ抽出
+            memo.tags = newText.match(TAG_REGEX) || [];
             saveData();
         }
-        
-        editingId = null;
-        renderApp();
+        editingId = null; renderApp();
     }
 
-    function setTagFilter(tag) {
-        currentFilter.tag = tag;
-        renderApp();
-    }
+    function setTagFilter(tag) { currentFilter.tag = tag; renderApp(); }
 
-    // ==========================================
-    // イベントリスナー（検索・設定系）
-    // ==========================================
-    document.getElementById('searchInput').addEventListener('input', (e) => {
-        currentFilter.text = e.target.value;
-        renderApp();
-    });
-
-    document.getElementById('themeColorPicker').addEventListener('input', (e) => {
-        const newColor = e.target.value;
-        document.documentElement.style.setProperty('--primary-color', newColor);
-        localStorage.setItem('themeColor_primary', newColor);
-    });
-
-    document.getElementById('bgColorPicker').addEventListener('input', (e) => {
-        const newColor = e.target.value;
-        document.documentElement.style.setProperty('--bg-color', newColor);
-        localStorage.setItem('themeColor_bg', newColor);
-    });
-
-    // メモ間隔スライダーのイベント
-    document.getElementById('memoGapSlider').addEventListener('input', (e) => {
-        const newGap = e.target.value;
-        document.documentElement.style.setProperty('--memo-gap', newGap + 'px');
-        localStorage.setItem('theme_memo_gap', newGap);
-    });
+    document.getElementById('searchInput').addEventListener('input', (e) => { currentFilter.text = e.target.value; renderApp(); });
+    document.getElementById('themeColorPicker').addEventListener('input', (e) => { const newColor = e.target.value; document.documentElement.style.setProperty('--primary-color', newColor); localStorage.setItem('themeColor_primary', newColor); });
+    document.getElementById('bgColorPicker').addEventListener('input', (e) => { const newColor = e.target.value; document.documentElement.style.setProperty('--bg-color', newColor); localStorage.setItem('themeColor_bg', newColor); });
+    document.getElementById('memoGapSlider').addEventListener('input', (e) => { const newGap = e.target.value; document.documentElement.style.setProperty('--memo-gap', newGap + 'px'); localStorage.setItem('theme_memo_gap', newGap); });
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js')
